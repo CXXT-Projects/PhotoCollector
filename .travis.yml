@@ -1,0 +1,30 @@
+language: android
+jdk: oraclejdk8
+sudo: false
+
+notifications:
+    email: false
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - $HOME/.android/build-cache
+
+before_install:
+  - echo y | android update sdk --no-ui --all --filter sys-img-armeabi-v7a-android-27,sys-img-x86_64-android-27,build-tools-27.0.3
+  - sudo apt-get install ant
+
+android:
+  components:
+    - platform-tools
+    - tools
+    - build-tools-28
+    - android-28
+    - extra-android-m2repository
+
+script: ./gradlew check

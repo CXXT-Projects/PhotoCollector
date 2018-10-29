@@ -20,13 +20,17 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  * */
 
 package com.huangyz0918.photocollector;
 
+import android.app.AlertDialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
+import android.os.Handler;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -39,9 +43,12 @@ import com.camerakit.CameraKitView;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import dmax.dialog.SpotsDialog;
 
 import static com.huangyz0918.photocollector.PermissionManager.requestCameraPermissions;
 
@@ -58,7 +65,7 @@ import static com.huangyz0918.photocollector.PermissionManager.requestCameraPerm
  */
 public class MainActivity extends AppCompatActivity {
     private String photoPath = Environment.getExternalStorageDirectory()
-            .getAbsolutePath() + "/temp" + ".png";
+            .getAbsolutePath() + "/";
 
     @BindView(R.id.camera)
     CameraKitView cameraView;
@@ -69,17 +76,26 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.btn_upload)
     Button btnUpload;
 
+    private Bitmap resultBitmap;
+    private Handler handler = new Handler();
+    private AlertDialog dialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         requestCameraPermissions(MainActivity.this);
+        initViews();
         initEvents();
     }
 
-    private void initEvents() {
+    private void initViews() {
+        dialog = new SpotsDialog.Builder().setContext(this).build();
+    }
 
+    private void initEvents() {
+        // button to take a snap and save the picture into local device.
         btnSnap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -88,13 +104,9 @@ public class MainActivity extends AppCompatActivity {
                     cameraView.captureImage(new CameraKitView.ImageCallback() {
                         @Override
                         public void onImage(CameraKitView cameraKitView, byte[] bytes) {
-                            Bitmap result = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                            try {
-                                FileOutputStream out = new FileOutputStream(photoPath);
-                                result.compress(Bitmap.CompressFormat.PNG, 100, out);
+                            if (bytes != null) {
+                                resultBitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                                 Toast.makeText(MainActivity.this, "Success!", Toast.LENGTH_SHORT).show();
-                            } catch (IOException e) {
-                                e.printStackTrace();
                             }
                         }
                     });
@@ -104,6 +116,14 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        // button to save the picture and wrap them and upload to the server.
+        btnUpload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getInfoUpload();
+            }
+        });
     }
 
     private boolean hasSDCard() {
@@ -111,6 +131,69 @@ public class MainActivity extends AppCompatActivity {
         return Environment.MEDIA_MOUNTED.equals(state);
     }
 
+    /**
+     * getDeviceId
+     *
+     * @return the android ID.
+     */
+    private String getDeviceId() {
+        return Settings.Secure.getString(this.getContentResolver(),
+                Settings.Secure.ANDROID_ID);
+    }
+
+    /**
+     * get the device info and wrap them with the picture.
+     * sent them into the specific server address.
+     */
+    private void getInfoUpload() {
+        dialog.show();
+        DeviceName.with(this).request(new DeviceName.Callback() {
+            @Override
+            public void onFinished(DeviceName.DeviceInfo info, Exception error) {
+                String manufacturer = info.manufacturer;
+                String name = info.marketName;
+                String model = info.model;
+                String androidId = getDeviceId();
+                String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
+                String deviceFinalName = manufacturer + "-"
+                        + name + "-"
+                        + model + "-"
+                        + androidId + "-"
+                        + timeStamp
+                        + ".png";
+
+                saveAndUploadPic(deviceFinalName);
+            }
+        });
+    }
+
+    private void saveAndUploadPic(final String deviceFinalName) {
+        if (resultBitmap == null || resultBitmap.isRecycled()) {
+            Toast.makeText(MainActivity.this, "Have you forgotten taking a pic? :(", Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
+        } else {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        FileOutputStream out = new FileOutputStream(photoPath + deviceFinalName);
+                        resultBitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+                        resultBitmap.recycle();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(MainActivity.this, "Success!", Toast.LENGTH_SHORT).show();
+                            dialog.dismiss();
+                        }
+                    });
+                }
+            }).start();
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

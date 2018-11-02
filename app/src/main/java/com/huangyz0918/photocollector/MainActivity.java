@@ -41,14 +41,21 @@ import android.widget.Toast;
 
 import com.camerakit.CameraKitView;
 
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
+
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import dmax.dialog.SpotsDialog;
+import timber.log.Timber;
 
 import static com.huangyz0918.photocollector.PermissionManager.requestCameraPermissions;
 
@@ -179,20 +186,41 @@ public class MainActivity extends AppCompatActivity {
                         FileOutputStream out = new FileOutputStream(photoPath + deviceFinalName);
                         resultBitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
                         resultBitmap.recycle();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
 
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(MainActivity.this, "Success!", Toast.LENGTH_SHORT).show();
-                            dialog.dismiss();
+                        FTPClient ftpClient = new FTPClient();
+                        ftpClient.connect("138.68.50.156", 22);
+                        if (ftpClient.login("root", "asd123")) {
+                            ftpClient.enterLocalPassiveMode();
+                            ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
+//                            FileInputStream in = new FileInputStream(new File(photoPath + deviceFinalName));
+//                            boolean result = ftpClient.storeFile("/root/" + deviceFinalName, in);
+//                            in.close();
+                            ftpClient.changeWorkingDirectory("/root/");
+                            ftpClient.storeUniqueFile(new FileInputStream(new File(photoPath + deviceFinalName)));
+
+                            finishedUploading("Done with Success!");
+                            ftpClient.logout();
+                            ftpClient.disconnect();
+                        } else {
+                            finishedUploading("Failed while login!");
                         }
-                    });
+                    } catch (IOException e) {
+                        Timber.e("ERROR IN IO:" + e.getMessage());
+                        finishedUploading("Error while uploading!");
+                    }
                 }
             }).start();
         }
+    }
+
+    private void finishedUploading(final String message) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            }
+        });
     }
 
     @Override

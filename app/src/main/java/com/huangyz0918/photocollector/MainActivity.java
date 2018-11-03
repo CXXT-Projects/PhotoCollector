@@ -41,19 +41,18 @@ import android.widget.Toast;
 
 import com.camerakit.CameraKitView;
 
-import org.apache.commons.net.ftp.FTP;
-import org.apache.commons.net.ftp.FTPClient;
-
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import cn.bmob.v3.Bmob;
+import cn.bmob.v3.datatype.BmobFile;
+import cn.bmob.v3.exception.BmobException;
+import cn.bmob.v3.listener.UploadFileListener;
 import dmax.dialog.SpotsDialog;
 import timber.log.Timber;
 
@@ -98,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initViews() {
+        Bmob.initialize(this, "");
         dialog = new SpotsDialog.Builder().setContext(this).build();
     }
 
@@ -186,24 +186,17 @@ public class MainActivity extends AppCompatActivity {
                         FileOutputStream out = new FileOutputStream(photoPath + deviceFinalName);
                         resultBitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
                         resultBitmap.recycle();
-
-                        FTPClient ftpClient = new FTPClient();
-                        ftpClient.connect("138.68.50.156", 22);
-                        if (ftpClient.login("root", "asd123")) {
-                            ftpClient.enterLocalPassiveMode();
-                            ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
-//                            FileInputStream in = new FileInputStream(new File(photoPath + deviceFinalName));
-//                            boolean result = ftpClient.storeFile("/root/" + deviceFinalName, in);
-//                            in.close();
-                            ftpClient.changeWorkingDirectory("/root/");
-                            ftpClient.storeUniqueFile(new FileInputStream(new File(photoPath + deviceFinalName)));
-
-                            finishedUploading("Done with Success!");
-                            ftpClient.logout();
-                            ftpClient.disconnect();
-                        } else {
-                            finishedUploading("Failed while login!");
-                        }
+                        final BmobFile bmobFile = new BmobFile(new File(photoPath + deviceFinalName));
+                        bmobFile.uploadblock(new UploadFileListener() {
+                            @Override
+                            public void done(BmobException e) {
+                                if (e == null) {
+                                    finishedUploading("Success:" + bmobFile.getFileUrl());
+                                } else {
+                                    finishedUploading("Failed:" + e.getMessage());
+                                }
+                            }
+                        });
                     } catch (IOException e) {
                         Timber.e("ERROR IN IO:" + e.getMessage());
                         finishedUploading("Error while uploading!");

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Photo Collector</string>
+    <string name="app_name">collector</string>
     <string name="btn_snap">Take Photo</string>
     <string name="btn_upload">Upload Photo</string>
 </resources>

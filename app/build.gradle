@@ -46,4 +46,7 @@ dependencies {
     // bmob
     implementation 'cn.bmob.android:bmob-sdk:3.6.3'
 
+    // markdown display
+    implementation 'com.zzhoujay.richtext:richtext:3.0.7'
+
 }

@@ -20,12 +20,12 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  * */
 
 package com.huangyz0918.photocollector;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
@@ -52,6 +52,7 @@ import butterknife.ButterKnife;
 import cn.bmob.v3.Bmob;
 import cn.bmob.v3.datatype.BmobFile;
 import cn.bmob.v3.exception.BmobException;
+import cn.bmob.v3.listener.SaveListener;
 import cn.bmob.v3.listener.UploadFileListener;
 import dmax.dialog.SpotsDialog;
 import timber.log.Timber;
@@ -97,6 +98,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initViews() {
+        // This key cannot be uploaded to the github.
         Bmob.initialize(this, "");
         dialog = new SpotsDialog.Builder().setContext(this).build();
     }
@@ -162,19 +164,37 @@ public class MainActivity extends AppCompatActivity {
                 String model = info.model;
                 String androidId = getDeviceId();
                 String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
-                String deviceFinalName = manufacturer + "-"
-                        + name + "-"
-                        + model + "-"
-                        + androidId + "-"
-                        + timeStamp
-                        + ".png";
+                String deviceFinalName =
+                        manufacturer + "|"
+                                + name + "|"
+                                + model + "|"
+                                + androidId + "|"
+                                + System.getProperty("os.version") + "|"
+                                + android.os.Build.VERSION.SDK + "|"
+                                + timeStamp
+                                + ".png";
 
-                saveAndUploadPic(deviceFinalName);
+                saveAndUploadPic(
+                        deviceFinalName,
+                        manufacturer,
+                        android.os.Build.VERSION.SDK,
+                        androidId,
+                        name,
+                        model,
+                        System.getProperty("os.version")
+                );
             }
         });
     }
 
-    private void saveAndUploadPic(final String deviceFinalName) {
+    private void saveAndUploadPic(final String deviceFinalName,
+                                  final String manufacturer,
+                                  final String version,
+                                  final String id,
+                                  final String name,
+                                  final String model,
+                                  final String os) {
+
         if (resultBitmap == null || resultBitmap.isRecycled()) {
             Toast.makeText(MainActivity.this, "Have you forgotten taking a pic? :(", Toast.LENGTH_SHORT).show();
             dialog.dismiss();
@@ -186,12 +206,29 @@ public class MainActivity extends AppCompatActivity {
                         FileOutputStream out = new FileOutputStream(photoPath + deviceFinalName);
                         resultBitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
                         resultBitmap.recycle();
+                        final Picture picture = new Picture();
                         final BmobFile bmobFile = new BmobFile(new File(photoPath + deviceFinalName));
-                        bmobFile.uploadblock(new UploadFileListener() {
+                        bmobFile.upload(new UploadFileListener() {
                             @Override
                             public void done(BmobException e) {
                                 if (e == null) {
-                                    finishedUploading("Success:" + bmobFile.getFileUrl());
+                                    picture.setPicture(bmobFile);
+                                    picture.setId(id);
+                                    picture.setManufacturer(manufacturer);
+                                    picture.setModel(model);
+                                    picture.setName(name);
+                                    picture.setOs(os);
+                                    picture.setVersion(version);
+                                    picture.save(new SaveListener<String>() {
+                                        @Override
+                                        public void done(String s, BmobException e) {
+                                            if (e == null) {
+                                                finishedUploading("Success!");
+                                            } else {
+                                                finishedUploading("Failed:" + e.getMessage());
+                                            }
+                                        }
+                                    });
                                 } else {
                                     finishedUploading("Failed:" + e.getMessage());
                                 }
@@ -226,7 +263,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.btn_settings) {
-            Toast.makeText(this, "Settings opened!", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, AboutActivity.class));
         }
         return super.onOptionsItemSelected(item);
     }

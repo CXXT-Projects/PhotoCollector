@@ -39,7 +39,7 @@
                 android:resource="@xml/provider_paths" />
         </provider>
 
-        <activity android:name=".AboutActivity"></activity>
+        <activity android:name=".AboutActivity" />
     </application>
 
 </manifest>

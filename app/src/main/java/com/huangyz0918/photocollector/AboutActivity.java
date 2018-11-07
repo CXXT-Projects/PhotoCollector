@@ -84,17 +84,19 @@ public class AboutActivity extends AppCompatActivity {
             "\n" +
             "#### Open source libraries" +
             "\n" +
-            "- [butter knife](http://jakewharton.github.io/butterknife/)" +
+            "- butter knife" +
             "\n" +
-            "- [cameraKit](https://github.com/CameraKit/camerakit-android)" +
+            "- cameraKit" +
             "\n" +
-            "- [spots dialog](https://github.com/d-max/spots-dialog)" +
+            "- spots dialog" +
             "\n" +
-            "- [timber](https://github.com/JakeWharton/timber)" +
+            "- timber" +
             "\n" +
             "- bmob-sdk" +
             "\n" +
-            "- [richtext](https://github.com/zzhoujay/RichText)" +
+            "- what's new" +
+            "\n" +
+            "- richtext" +
             "\n" +
             "\n" +
             "#### Open Source License\n" +

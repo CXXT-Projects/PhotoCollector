@@ -49,4 +49,7 @@ dependencies {
     // markdown display
     implementation 'com.zzhoujay.richtext:richtext:3.0.7'
 
+    // What's new
+    implementation 'io.github.tonnyl:whatsnew:0.1.1'
+
 }

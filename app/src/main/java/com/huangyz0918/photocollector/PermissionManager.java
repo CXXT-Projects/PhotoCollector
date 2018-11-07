@@ -50,7 +50,7 @@ public class PermissionManager {
      * 1. the camera permissions
      * 2. the storage permissions, including the write and read permission.
      */
-    public static void requestCameraPermissions(Activity activity) {
+    public static void requestNeededPermissions(Activity activity) {
         if (ContextCompat.checkSelfPermission(activity.getApplicationContext(), Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(activity,

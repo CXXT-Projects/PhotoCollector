@@ -1,5 +1,36 @@
 <resources>
     <string name="app_name">collector</string>
+    <!-- String related to views -->
     <string name="btn_snap">Take Photo</string>
     <string name="btn_upload">Upload Photo</string>
+    <!-- String related to results -->
+    <string name="error_tag_io">ERROR IN IO:</string>
+    <string name="error_failed">Failed:</string>
+    <string name="error_no_sd_card">No SD card in your device, we cannot save the picture to local!</string>
+    <string name="error_uploading">Error while uploading! Please check your storage related permissions!</string>
+    <string name="error_forget_taking">Have you forgotten taking a pic? :(</string>
+    <string name="success">Success!</string>
+
+    <!-- Strings with instruction -->
+    <string name="go_on">继续</string>
+    <string name="title">使用说明</string>
+    <string name="title_1">1. Welcome to Photo Collector! </string>
+    <string name="info_1">这是一款由山东大学崇新学堂开发的，完全免费的高质量照片数据收集器！</string>
+    <string name="title_2">2. 低权限</string>
+    <string name="info_2">您只需要安装这个程序，授予拍照与存储空间的权限，就能够正常使用。</string>
+    <string name="title_3">3. 拍摄照片</string>
+    <string name="info_3">进入主界面，您可以看到您的摄像头已经被打开，并且能够成功看到拍摄（如果黑屏，确保权限授予了，重启应用即可），点击屏幕左下角按钮 "Take Photo" 即可完成照片的拍摄。</string>
+    <string name="title_4">4. 上传照片</string>
+    <string name="info_4">在拍摄完成一张照片的时候，别退出软件，紧接着点击屏幕右下角的 "Upload Photo" 按钮，即可开始照片的上传，上传成功将会出现 "Success" 的消息，说明您已经成功手机并上传了一张照片！</string>
+    <string name="title_5">5. 关于拍摄内容</string>
+    <string name="info_5">至于拍摄的景物，可以是任意，不过我们不建议您上传含有高识别度的物体（如：直接拍摄人物），因为我们收集的数据未来很可能会直接开源，为了您的隐私着想。</string>
+    <string name="title_6">6. 绝对安全</string>
+    <string name="info_6">我们不会收集您的任何隐私信息，您可以查看我们的开源代码（https://github.com/CXXT-Projects/PhotoCollector），如果在这个软件中发现任何问题，都可以 file 一个 issue 帮助我们更好的改善，谢谢！</string>
+    <string name="title_7">7. 关于作者</string>
+    <string name="title_author">huangyz0918:</string>
+    <string name="info_7">如果您还有什么疑问，我会说："请您高抬贵手，帮助一下乌干达的可怜儿童吧！"</string>
+
+    <!-- Color String -->
+    <string name="color_white">#FFFFFF</string>
+    <string name="color_grey">#BEBEBE</string>
 </resources>

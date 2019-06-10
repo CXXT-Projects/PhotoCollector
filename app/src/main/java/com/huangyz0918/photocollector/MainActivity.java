@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
             sharedPreferences.edit().putBoolean("first", false).apply();
             showDialogInfo(MainActivity.this);
         }
-        Bmob.initialize(this, ""); // This key cannot be uploaded to the github.
+        Bmob.initialize(this, "029fb486c5e738c9fe68b89d16739723"); // This key cannot be uploaded to the github.
         dialog = new SpotsDialog.Builder().setContext(this).build();
     }
 
